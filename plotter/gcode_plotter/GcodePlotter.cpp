@@ -22,7 +22,7 @@ GcodePlotter::GcodePlotter(double maxXmm, double maxYmm, double stepsPerMm, int 
 
 void GcodePlotter::processLine(char* line) {
   gcodeParser.parseLine(line, &gcodeCmd);
-  gcodeParser.printCommand(gcodeCmd);
+  //gcodeParser.printCommand(gcodeCmd);
   processGcodeCmd(&gcodeCmd);
 }
 
@@ -47,30 +47,34 @@ void GcodePlotter::processGcodeCmd(GcodeCmd* cmd) {
           break;
         case ABSOLUTE_MODE:
           _mode = ABSOLUTE_MODE;
-          Serial.print("Setting mode: ");
-          Serial.println((int)_mode);
+          //Serial.print("Setting mode: ");
+          //Serial.println((int)_mode);
           break;
         case RELATIVE_MODE:
           _mode = RELATIVE_MODE;
-          Serial.print("Setting mode: ");
-          Serial.println((int)_mode);
+          //Serial.print("Setting mode: ");
+          //Serial.println((int)_mode);
           break;
-        default:
-          Serial.print("Command not recognized: ");
-          Serial.println(cmd->cmdNum);
+        case METRIC_UNITS:
+          break;
+        //default:
+          //Serial.print("Command not recognized: ");
+          //Serial.println(cmd->cmdNum);
       }
+      Serial.println("ok");
       break;
     case MCMD:
       // xxx
       break;
     default:
-      Serial.println("Not a valid command");
+      //Serial.println("Not a valid command");
+      Serial.println("error: Not a valid command");
   }
 }
 
 void GcodePlotter::home() {
   // TODO: home
-  Serial.println("HOME...");
+  //Serial.println("HOME...");
   
   // Z
   movePen(1.0);
@@ -322,10 +326,10 @@ double GcodePlotter::calculateAngle(double x, double y, double cx, double cy) {
 void GcodePlotter::movePen(double z) {
   if (z <= 0.0) {
     _pen->write(_penDownDeg);
-    Serial.println("Pen down");
+    //Serial.println("Pen down");
   } else {
     _pen->write(_penUpDeg);
-    Serial.println("Pen up");
+    //Serial.println("Pen up");
   }
   delay(333);
   _currentZ = z;

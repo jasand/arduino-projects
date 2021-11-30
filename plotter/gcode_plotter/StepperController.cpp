@@ -17,8 +17,8 @@ StepperController::StepperController(byte negativeDir, byte mode, byte ms1Pin, b
 void StepperController::setMode(byte mode) {
   _mode = mode;
   // MS1,MS2: L,L=full - H,L=1/2 - L,H=1/4 - H,H=1/8 
-  Serial.print("Setting mode: ");
-  Serial.println(mode);
+  //Serial.print("Setting mode: ");
+  //Serial.println(mode);
   switch (_mode) {
     case FULL_STEP:
       digitalWrite(_ms1Pin, LOW);
@@ -45,12 +45,12 @@ void StepperController::setMode(byte mode) {
 }
 
 void StepperController::enable() {
-  Serial.println("enable()");
+  //Serial.println("enable()");
   digitalWrite(_enablePin, LOW);
 }
 
 void StepperController::disable() {
-  Serial.println("disable()");
+  //Serial.println("disable()");
   digitalWrite(_enablePin, HIGH);
 }
 

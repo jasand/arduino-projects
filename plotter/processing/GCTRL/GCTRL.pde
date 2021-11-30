@@ -71,15 +71,15 @@ void draw()
   text("g: stream a g-code file", 12, y); y += dy;
   text("x: stop streaming g-code (this is NOT immediate)", 12, y); y += dy;
   y = height - dy;
-  text("current jog speed: " + speed + " inches per step", 12, y); y -= dy;
+  text("current jog speed: " + speed + " mm per step", 12, y); y -= dy;
   text("current serial port: " + portname, 12, y); y -= dy;
 }
 
 void keyPressed()
 {
-  if (key == '1') speed = 0.001;
-  if (key == '2') speed = 0.01;
-  if (key == '3') speed = 0.1;
+  if (key == '1') speed = 0.1;
+  if (key == '2') speed = 1.0;
+  if (key == '3') speed = 10.0;
   
   if (!streaming) {
     if (keyCode == LEFT) port.write("G91\nG21\nG00 X-" + speed + " Y0.000 Z0.000\n");

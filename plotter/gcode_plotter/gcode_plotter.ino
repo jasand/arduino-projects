@@ -23,7 +23,7 @@
 #define MAX_Y       (double) 140.0  // 140mm
 #define STEP_PER_MM (double) 10.0    // 10 steps per mm
 #define PEN_UP_DEG   70
-#define PEN_DOWN_DEG 90
+#define PEN_DOWN_DEG 95
 
 const int BUF_LEN = 64;
 

@@ -17,8 +17,8 @@ GcodeParser::GcodeParser() {
 boolean GcodeParser::parseLine(char* line, GcodeCmd* cmd) {
   removeEndOfLineComment(line);
   uppercase(line);
-  Serial.print("Parsing: ");
-  Serial.println(line);
+  //Serial.print("Parsing: ");
+  //Serial.println(line);
   parseCommand(line);
   parseParams(line);
   boolean check = (_command == GCMD || _command == MCMD) && _commandNumber != UNDEF_INTEGER;
@@ -34,7 +34,7 @@ boolean GcodeParser::parseLine(char* line, GcodeCmd* cmd) {
     cmd->fParam = _fval;
     cmd->sParam = _sval;
   } else {
-    Serial.println("Command validation error");
+    Serial.println("error: Command validation error");
   }
   return check;
 }
