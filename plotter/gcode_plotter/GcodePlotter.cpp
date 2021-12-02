@@ -47,35 +47,30 @@ void GcodePlotter::processGcodeCmd(GcodeCmd* cmd) {
           break;
         case ABSOLUTE_MODE:
           _mode = ABSOLUTE_MODE;
-          //Serial.print("Setting mode: ");
-          //Serial.println((int)_mode);
           break;
         case RELATIVE_MODE:
           _mode = RELATIVE_MODE;
-          //Serial.print("Setting mode: ");
-          //Serial.println((int)_mode);
           break;
         case METRIC_UNITS:
+          Serial.println("Metric...");
           break;
-        //default:
-          //Serial.print("Command not recognized: ");
-          //Serial.println(cmd->cmdNum);
       }
+      
       Serial.println("ok");
+      
       break;
     case MCMD:
-      // xxx
+      // Don't need this yet
       break;
     default:
-      //Serial.println("Not a valid command");
-      Serial.println("error: Not a valid command");
+      Serial.print("Not a valid command: ");
+      Serial.print(cmd->cmdType);
+      Serial.print(" ");
+      Serial.println(cmd->cmdNum);
   }
 }
 
 void GcodePlotter::home() {
-  // TODO: home
-  //Serial.println("HOME...");
-  
   // Z
   movePen(1.0);
   
@@ -109,16 +104,9 @@ void GcodePlotter::home() {
 }
 
 void GcodePlotter::fastMove(double x, double y, double z, unsigned int feedRate) {
-  double targetX, targetY, targetZ;
-  if (_mode == ABSOLUTE_MODE) {
-    targetX = x != UNDEF_DOUBLE ? x : _currentX;;
-    targetY = y != UNDEF_DOUBLE ? y : _currentY;
-    targetZ = z != UNDEF_DOUBLE ? z : _currentZ;
-  } else {
-    targetX = x != UNDEF_DOUBLE ? _currentX + x : _currentX;
-    targetY = y != UNDEF_DOUBLE ? _currentY + y : _currentY;
-    targetZ = z != UNDEF_DOUBLE ? _currentZ + z : _currentZ;
-  }
+  double targetX = calculateRealTarget(x, _currentX);
+  double targetY = calculateRealTarget(y, _currentY);
+  double targetZ = calculateRealTarget(z, _currentZ);
 
   if (feedRate != UNDEF_INTEGER) {
     _feedRate = feedRate; // Set feedrate, but ignored in this method...
@@ -157,16 +145,9 @@ void GcodePlotter::fastMove(double x, double y, double z, unsigned int feedRate)
 }
 
 void GcodePlotter::linearInterpolation(double x, double y, double z, unsigned int feedRate) {
-  double targetX, targetY, targetZ;
-  if (_mode == ABSOLUTE_MODE) {
-    targetX = x != UNDEF_DOUBLE ? x : _currentX;;
-    targetY = y != UNDEF_DOUBLE ? y : _currentY;
-    targetZ = z != UNDEF_DOUBLE ? z : _currentZ;
-  } else {
-    targetX = x != UNDEF_DOUBLE ? _currentX + x : _currentX;
-    targetY = y != UNDEF_DOUBLE ? _currentY + y : _currentY;
-    targetZ = z != UNDEF_DOUBLE ? _currentZ + z : _currentZ;
-  }
+  double targetX = calculateRealTarget(x, _currentX);
+  double targetY = calculateRealTarget(y, _currentY);
+  double targetZ = calculateRealTarget(z, _currentZ);
 
   if (feedRate != UNDEF_INTEGER) {
     _feedRate = feedRate; // Set feedrate
@@ -219,19 +200,12 @@ void GcodePlotter::linearInterpolation(double x, double y, double z, unsigned in
 }
 
 void GcodePlotter::circularInterpolation(double x, double y, double z, double i, double j, unsigned int feedRate, byte dir) {
-  double targetX, targetY, targetZ, centerX, centerY;
-  if (_mode == ABSOLUTE_MODE) {
-    targetX = x != UNDEF_DOUBLE ? x : _currentX;
-    targetY = y != UNDEF_DOUBLE ? y : _currentY;
-    targetZ = z != UNDEF_DOUBLE ? z : _currentZ;
-  } else {
-    targetX = x != UNDEF_DOUBLE ? _currentX + x : _currentX;
-    targetY = y != UNDEF_DOUBLE ? _currentY + y : _currentY;
-    targetZ = z != UNDEF_DOUBLE ? _currentZ + z : _currentZ;
-  }
+  double targetX = calculateRealTarget(x, _currentX);
+  double targetY = calculateRealTarget(y, _currentY);
+  double targetZ = calculateRealTarget(z, _currentZ);
   // Always relative to start point...
-  centerX = i != UNDEF_DOUBLE ? _currentX + i : _currentX;
-  centerY = j != UNDEF_DOUBLE ? _currentY + j : _currentY;
+  double centerX = i != UNDEF_DOUBLE ? _currentX + i : _currentX;
+  double centerY = j != UNDEF_DOUBLE ? _currentY + j : _currentY;
 
   if (feedRate != UNDEF_INTEGER) {
     _feedRate = feedRate; // Set feedrate
@@ -283,20 +257,12 @@ void GcodePlotter::circularInterpolation(double x, double y, double z, double i,
 // Borrowed algorithm from https://goldberg.berkeley.edu/pubs/XY-Interpolation-Algorithms.pdf
 /*
 void GcodePlotter::circularInterpolationAlt(double x, double y, double z, double i, double j, byte dir) {
-  double targetX, targetY, targetZ, centerX, centerY;
-  if (_mode == ABSOLUTE_MODE) {
-    targetX = x != UNDEF_DOUBLE ? x : _currentX;
-    targetY = y != UNDEF_DOUBLE ? y : _currentY;
-    targetZ = z != UNDEF_DOUBLE ? z : _currentZ;
-    centerX = i != UNDEF_DOUBLE ? i : _currentX;
-    centerY = j != UNDEF_DOUBLE ? j : _currentY;
-  } else {
-    targetX = x != UNDEF_DOUBLE ? _currentX + x : _currentX;
-    targetY = y != UNDEF_DOUBLE ? _currentY + y : _currentY;
-    targetZ = z != UNDEF_DOUBLE ? _currentZ + z : _currentZ;
-    centerX = i != UNDEF_DOUBLE ? _currentX + i : _currentX;
-    centerY = j != UNDEF_DOUBLE ? _currentY + j : _currentY;
-  }
+  double targetX = calculateRealTarget(x, _currentX);
+  double targetY = calculateRealTarget(y, _currentY);
+  double targetZ = calculateRealTarget(z, _currentZ);
+  // Always relative to start point...
+  double centerX = i != UNDEF_DOUBLE ? _currentX + i : _currentX;
+  double centerY = j != UNDEF_DOUBLE ? _currentY + j : _currentY;
 
   // Z first
   if (targetZ != _currentZ) {
@@ -323,13 +289,19 @@ double GcodePlotter::calculateAngle(double x, double y, double cx, double cy) {
   return angle;
 }
 
+double GcodePlotter::calculateRealTarget(double target, double current) {
+  if (_mode == ABSOLUTE_MODE) {
+    return target != UNDEF_DOUBLE ? target : current;
+  } else {
+    return target != UNDEF_DOUBLE ? current + target : current;
+  }
+}
+
 void GcodePlotter::movePen(double z) {
   if (z <= 0.0) {
     _pen->write(_penDownDeg);
-    //Serial.println("Pen down");
   } else {
     _pen->write(_penUpDeg);
-    //Serial.println("Pen up");
   }
   delay(333);
   _currentZ = z;
@@ -352,9 +324,6 @@ void GcodePlotter::stepY() {
 }
 
 unsigned long GcodePlotter::stepRateMicros() {
-  //unsigned long stepRateMicros = MICROS_PER_MIN / _feedRate / _stepsPerMm;
-  //Serial.print("Step rate us: ");
-  //Serial.println(stepRateMicros);
   return MICROS_PER_MIN / _feedRate / _stepsPerMm; 
 }
 

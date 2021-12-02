@@ -35,6 +35,7 @@ private:
   StepperController* _yMotor;
 
   void movePen(double z);
+  double calculateRealTarget(double target, double current);
   double calculateAngle(double x, double y, double cx, double cy);
   void stepX();
   void stepY();

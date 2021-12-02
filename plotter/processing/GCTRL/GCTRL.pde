@@ -26,7 +26,7 @@ void openSerialPort()
   if (portname == null) return;
   if (port != null) port.stop();
   
-  port = new Serial(this, portname, 9600);
+  port = new Serial(this, portname, 115200);
   
   port.bufferUntil('\n');
 }

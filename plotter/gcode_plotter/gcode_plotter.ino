@@ -25,7 +25,7 @@
 #define PEN_UP_DEG   70
 #define PEN_DOWN_DEG 95
 
-const int BUF_LEN = 64;
+const int BUF_LEN = 128;
 
 Servo servo;
 
@@ -44,8 +44,9 @@ void setup() {
   pinMode(END_Y, INPUT_PULLUP);
 
   servo.attach(SRV_PIN);
+  servo.write(PEN_UP_DEG);
   
-  Serial.begin(9600);
+  Serial.begin(115200);
   delay(500);
 }
 
@@ -53,7 +54,6 @@ void loop() {
   StepperController xMotor(STEP_CW, HALF_STEP, MS1_PIN, MS2_PIN, ENABLE_PIN, STEPX_DIR, STEPX_STEP);
   StepperController yMotor(STEP_CCW, HALF_STEP, MS1_PIN, MS2_PIN, ENABLE_PIN, STEPY_DIR, STEPY_STEP);
   GcodePlotter gcodePlotter(MAX_X, MAX_Y, STEP_PER_MM, PEN_UP_DEG, PEN_DOWN_DEG, END_X, END_Y, &servo, &xMotor, &yMotor);
-
 
   gcodePlotter.home();
 
@@ -76,37 +76,5 @@ void loop() {
       }
     }
   }
-
-
-/*
-  Serial.println("Start loop");
-
-  xMotor.setPosDir();
-  for (int i=0; i<200; i++) {
-    xMotor.step();
-  }
-  xMotor.setNegDir();
-  for (int i=0; i<400; i++) {
-    xMotor.step();
-  }
-  xMotor.setPosDir();
-  for (int i=0; i<200; i++) {
-    xMotor.step();
-  }
-  
-  yMotor.setPosDir();
-  for (int i=0; i<200; i++) {
-    yMotor.fastStep();
-  }
-  yMotor.setNegDir();
-  for (int i=0; i<400; i++) {
-    yMotor.fastStep();
-  }
-  yMotor.setPosDir();
-  for (int i=0; i<200; i++) {
-    yMotor.fastStep();
-  }
-*/
-  
   
 }

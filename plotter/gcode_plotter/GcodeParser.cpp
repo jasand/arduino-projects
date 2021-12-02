@@ -17,8 +17,6 @@ GcodeParser::GcodeParser() {
 boolean GcodeParser::parseLine(char* line, GcodeCmd* cmd) {
   removeEndOfLineComment(line);
   uppercase(line);
-  //Serial.print("Parsing: ");
-  //Serial.println(line);
   parseCommand(line);
   parseParams(line);
   boolean check = (_command == GCMD || _command == MCMD) && _commandNumber != UNDEF_INTEGER;
@@ -34,7 +32,7 @@ boolean GcodeParser::parseLine(char* line, GcodeCmd* cmd) {
     cmd->fParam = _fval;
     cmd->sParam = _sval;
   } else {
-    Serial.println("error: Command validation error");
+    Serial.println("error: Command validation error.");
   }
   return check;
 }
@@ -131,7 +129,7 @@ unsigned int GcodeParser::parseIntValue(char* line) {
 }
 
 double GcodeParser::parseDoubleValue(char* line) {
-  char buf[12];
+  char buf[16];
   int i = 0;
   while ((line[i] >= '0' && line[i] <= '9') || line[i] == '.' || line[i] == '-') {
     buf[i] = line[i];
@@ -143,10 +141,10 @@ double GcodeParser::parseDoubleValue(char* line) {
 
 void GcodeParser::printCommand(GcodeCmd cmd) {
   Serial.print("Command: ");
-  Serial.println(cmd.cmdType);
+  Serial.print(cmd.cmdType);
   Serial.print("    Num: ");
   Serial.println(cmd.cmdNum);
-  Serial.print("      X: ");
+  Serial.print("    X: ");
   Serial.print(cmd.xParam);
   Serial.print("  Y: ");
   Serial.print(cmd.yParam);
