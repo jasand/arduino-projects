@@ -60,7 +60,15 @@ void GcodePlotter::processGcodeCmd(GcodeCmd* cmd) {
       
       break;
     case MCMD:
-      // Don't need this yet
+      switch (cmd->cmdNum) {
+        case END_OF_PROGRAM:
+          break;
+        case SPINDLE_ON_CW:
+          break;
+        case SPINDLE_STOP:
+          break;
+      }
+      Serial.println("ok");
       break;
     default:
       Serial.print("Not a valid command: ");
@@ -223,18 +231,19 @@ void GcodePlotter::circularInterpolation(double x, double y, double z, double i,
   double angleDiff = 0.0;
 
   if (dir == CIRC_INTERP_CW) {
-    if (stopAngle > startAngle) {
+    if (stopAngle >= startAngle) {
       stopAngle = stopAngle - (2 * M_PI);
     }
     angleDiff = stopAngle - startAngle;
   } else if (dir == CIRC_INTERP_CCW) {
-    if (startAngle > stopAngle) {
+    if (startAngle >= stopAngle) {
       stopAngle = stopAngle + (2 * M_PI);
     } 
     angleDiff = stopAngle - startAngle;
   }
 
-  double numIter = radius/2.0;
+  double arcLen = fabs(angleDiff * radius);  // Explicit for clarity
+  double numIter = arcLen;
   double angleDelta = angleDiff / numIter;
 
   for (int i=1; i < (int) numIter; i++) {
@@ -256,7 +265,7 @@ void GcodePlotter::circularInterpolation(double x, double y, double z, double i,
 
 // Borrowed algorithm from https://goldberg.berkeley.edu/pubs/XY-Interpolation-Algorithms.pdf
 /*
-void GcodePlotter::circularInterpolationAlt(double x, double y, double z, double i, double j, byte dir) {
+void GcodePlotter::circularInterpolationAlt(double x, double y, double z, double i, double j, unsigned int feedRate, byte dir) {
   double targetX = calculateRealTarget(x, _currentX);
   double targetY = calculateRealTarget(y, _currentY);
   double targetZ = calculateRealTarget(z, _currentZ);
@@ -271,11 +280,12 @@ void GcodePlotter::circularInterpolationAlt(double x, double y, double z, double
   
   int x1 = round(_currentX);
   int y1 = round(_currentY);
-  int x2, y2;
-  int x3 = round(targetX);
-  int y3 = round(targetY);
+  int x2 = round(targetX);
+  int y2 = round(targetY);
   int cx = round(centerX);
   int cy = round(centerY);
+  int rad = sqrt(((x2-cx)*(x2-cx))+((y2-cy)*(y2-cy));
+  int radrad = rad*rad;
 }
 */
 
@@ -303,7 +313,7 @@ void GcodePlotter::movePen(double z) {
   } else {
     _pen->write(_penUpDeg);
   }
-  delay(333);
+  delay(500);
   _currentZ = z;
 }
 

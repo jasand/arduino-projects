@@ -60,15 +60,20 @@ void loop() {
   char line[BUF_LEN];
   char c;
   int lineIndex = 0;
+  unsigned long t1, t2;
   
   while(1) {
-    
+    t1 = micros();
     while ( Serial.available()>0 ) {
       c = Serial.read();
       if (( c == '\n') || (c == '\r') ) {
         if ( lineIndex > 0 ) {   
+          t2 = micros();
+          Serial.print("Comm: ");
+          Serial.println(t2-t1);
           line[lineIndex] = '\0';
           gcodePlotter.processLine(line);
+          t1 = micros();
         }
         lineIndex = 0;
       } else {

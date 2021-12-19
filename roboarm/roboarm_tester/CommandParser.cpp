@@ -53,6 +53,8 @@ void CommandParser::parseParams(char* line, Command* cmd) {
   if (ptr) {
     ptr = ptr+2;
     cmd->jointc = parseIntValue(ptr);
+    Serial.print("JC: ");
+    Serial.println(cmd->jointc);
   }
   ptr = strstr(line, JOINTD_TOKEN);
   if (ptr) {

@@ -45,8 +45,8 @@ void setup() {
   pinMode(END_JB, INPUT_PULLUP);
 
   _jointC.attach(JC_SRV_PIN);
-  _jointD.attach(JD_SRV_PIN);
-  _jointE.attach(JE_SRV_PIN);
+  //_jointD.attach(JD_SRV_PIN);
+  //_jointE.attach(JE_SRV_PIN);
   //jf.attach(JF_SRV_PIN);
   
   Serial.begin(9600);
@@ -56,10 +56,10 @@ void setup() {
 void loop() {
   CommandParser parser;
   Command cmd;
-  StepperController jaMotor(STEP_CW, HALF_STEP, MS1_PIN, MS2_PIN, ENABLE_PIN, STEPA_DIR, STEPA_STEP);
-  StepperController jbMotor(STEP_CCW, HALF_STEP, MS1_PIN, MS2_PIN, ENABLE_PIN, STEPB_DIR, STEPB_STEP);
-  _jointA = &jaMotor;
-  _jointB = &jbMotor;
+  //StepperController jaMotor(STEP_CW, HALF_STEP, MS1_PIN, MS2_PIN, ENABLE_PIN, STEPA_DIR, STEPA_STEP);
+  //StepperController jbMotor(STEP_CCW, HALF_STEP, MS1_PIN, MS2_PIN, ENABLE_PIN, STEPB_DIR, STEPB_STEP);
+  //_jointA = &jaMotor;
+  //_jointB = &jbMotor;
 
   char line[BUF_LEN];
   char c;
@@ -72,7 +72,11 @@ void loop() {
       if (( c == '\n') || (c == '\r') ) {
         if ( lineIndex > 0 ) {   
           line[lineIndex] = '\0';
+          Serial.print("Parsing line: ");
+          Serial.println(line);
           parser.parseLine(line, &cmd);
+          parser.printCommand(cmd);
+          processCommand(cmd);
         }
         lineIndex = 0;
       } else {
@@ -108,7 +112,7 @@ void moveArm(int ja, int jb, int jc, int jd, int je, int jf) {
     }
     while (steps > 0) {
        _jointA->step();
-       delay(1);
+       delay(3);
        steps--;
     }
   }
@@ -123,25 +127,27 @@ void moveArm(int ja, int jb, int jc, int jd, int je, int jf) {
     }
     while (steps > 0) {
        _jointB->step();
-       delay(1);
+       delay(3);
        steps--;
     }
   }
 
   if (jc != UNDEF_INTEGER && jc >=0 && jc <= 180) {
     _jointC.write(jc);
+    Serial.print("Write C: ");
+    Serial.println(jc);
   }
-/*
+
   if (jd != UNDEF_INTEGER && jd >=0 && jd <= 180) {
     _jointD.write(jd);
-    _currJD = jd;
+    Serial.println("Write D");
   }
 
   if (je != UNDEF_INTEGER && je >=0 && je <= 180) {
     _jointE.write(je);
-    _currJE = je;
+    Serial.println("Write E");
   }
-
+/*
   if (jf != UNDEF_INTEGER && jf >=0 && jf <= 180) {
     _jointF.write(jf);
     _currJF = jf;

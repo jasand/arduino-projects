@@ -15,6 +15,9 @@
 #define MACHINE_ZERO    28
 #define ABSOLUTE_MODE   90
 #define RELATIVE_MODE   91
+#define END_OF_PROGRAM   2
+#define SPINDLE_ON_CW    3
+#define SPINDLE_STOP    91
 
 const unsigned long MICROS_PER_MIN = 60000000L;
 
@@ -46,7 +49,7 @@ protected:
   void fastMove(double x, double y, double z, unsigned int feedRate);
   void linearInterpolation(double x, double y, double z, unsigned int feedRate);
   void circularInterpolation(double x, double y, double z, double i, double j, unsigned int feedRate, byte dir);
-  //void circularInterpolationAlt(double x, double y, double z, double i, double j, byte dir);
+  //void circularInterpolationAlt(double x, double y, double z, double i, double j, unsigned int feedRate, byte dir);
   
 public:
   GcodePlotter(double maxXmm, double maxYmm, double stepsPerMm, int penUpDeg, int penDownDeg, byte endstopXPin, byte endstopYPin,
